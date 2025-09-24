@@ -1,43 +1,42 @@
 
 def puntaje_equipo(puntaje):
-    
-# Calculo el puntaje de cada equipo en cada ronda:
-# +3 puntos por cada punto de innovación.
-# +1 punto por cada punto de presentación.
-# -1 punto si tuvo errores graves (True).
-
-    # variable auxiliar para innovación
+    """
+     Calculo el puntaje de cada equipo en cada ronda.
+    """
     puntos_innovacion = 3 * puntaje['innovacion']
-    # variable auxiliar para presentación
     puntos_presentacion = puntaje['presentacion']
-    # variable auxiliar para errores (1 si hay error, 0 si no)
     penalizacion_error = 1 if puntaje['errores'] else 0
-    # suma final
     puntaje_total = puntos_innovacion + puntos_presentacion - penalizacion_error
 
     return puntaje_total
 
 
 def puntaje_ronda(ronda):
-    #devuelvo todos los elementos de param como pares.
+    """
+    Devuelve un diccionario con los puntajes de todos los equipos de una ronda
+    """
     equipos_data = ronda.items()
-    #creo una lista vacia para guardar los pares (equipo,puntaje)
     pares = []
-    #recorro todos los pares dentro de equipos_stats
     for equipo, data in equipos_data:
-        puntaje = puntaje_equipo(data) #le paso las estadisticas de un equipo.
+        puntaje = puntaje_equipo(data) 
         pares.append((equipo,puntaje))
-    return dict(pares)  #convierto la lista de tuplas a diccionario.
+    return dict(pares)  
 
 def mejor_equipo_ronda(puntajes):
+    """
+    Encuentra el mejor equipo de una ronda
+    """
     mejor = None
     for equipo, puntaje in puntajes.items():
-        if mejor is None or puntaje > mejor[1]:   #mejor es una tupla
+        if mejor is None or puntaje > mejor[1]:   
             mejor = (equipo, puntaje)
     return mejor
 
 def mantener_acumulado (acumulado,ronda,equipo_mer):
-    #recorro equipos e inicializo.
+    """
+    Inicializa y actualiza el acumulado con los valores de la ronda.
+    """
+
     for equipo,data in ronda.items():
         if equipo not in acumulado:
             acumulado[equipo] = {
@@ -47,18 +46,12 @@ def mantener_acumulado (acumulado,ronda,equipo_mer):
                 "mer":0,
                 "total":0,
             }
-        #sumo la innovación al acumulado.
-        acumulado[equipo]["innovacion"]=acumulado[equipo]["innovacion"] + data["innovacion"]
-        #sumo la presentación al acumulado.
-        acumulado[equipo]["presentacion"]=acumulado[equipo]["presentacion"] + data["presentacion"]
-        #si hubo errores los cuento.
+        acumulado[equipo]["innovacion"] += data["innovacion"]
+        acumulado[equipo]["presentacion"] += data["presentacion"]
         acumulado[equipo]["errores"] += 1 if list(filter(lambda x: x is True, [data["errores"]])) else 0
-        #calculo el puntaje de la ronda.
         points = puntaje_equipo(data)
-        #sumo el puntaje de la ronda al total acumulado.
-        acumulado[equipo]["total"] = acumulado[equipo]["total"] + points
-    #cuando termino de recorrer los equipos, aumenro el contador del mer (mejor equipo)
-    acumulado[equipo_mer]["mer"] = acumulado[equipo_mer]["mer"] + 1
+        acumulado[equipo]["total"] += points
+    acumulado[equipo_mer]["mer"] += 1
 
     return acumulado
 
